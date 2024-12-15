@@ -57,12 +57,15 @@ jobs:
       run: |
         echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
         export KUBECONFIG=kubeconfig.yaml
-
+        
     - name: Deploy to Green Environment
-      run: |
-        kubectl apply -f deployment.yaml
-        kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:latest --namespace=green
-        kubectl rollout status deployment/blue-green --namespace=green
+      uses: tale/kubectl-action@v1
+      with:
+        base64-kube-config: ${{ secrets.KUBECONFIG }}
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:latest --namespace=green
+          kubectl rollout status deployment/blue-green --namespace=green
 
   switch:
     name: Switch Traffic
