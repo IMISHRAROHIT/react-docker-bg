@@ -53,10 +53,11 @@ jobs:
           sudo mv kubectl /usr/local/bin/kubectl
         
     - name: Deploy to Green Environment
-      uses: tale/kubectl-action@v1
-      with:
-        base64-kube-config: ${{ secrets.KUBECONFIG }}
-        run: |
+      #uses: tale/kubectl-action@v1
+      #with:
+        #base64-kube-config: ${{ secrets.KUBECONFIG }}
+      run: |
+          aws eks update-kubeconfig --name blue-gree-cluster --resgion us-east-1
           kubectl apply -f deployment.yaml
           kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:latest --namespace=green
           kubectl rollout status deployment/blue-green --namespace=green
