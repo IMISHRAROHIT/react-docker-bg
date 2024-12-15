@@ -23,12 +23,11 @@ jobs:
     - name: Build Docker Image
       run: |
         docker build -t blue-green:${{ github.sha }} .
-        docker tag blue-green:${{ github.sha }} imishrarohit/blue-green:${{ github.sha }}
+        docker tag blue-green:${{ github.sha }} imishrarohit/blue-green:latest
 
     - name: Push Docker Image
       run: |
-        docker push imishrarohit/blue-green:${{ github.sha }}
-
+        docker push imishrarohit/blue-green:latest
   deploy:
     name: Deploy to Green Environment
     needs: build
@@ -39,6 +38,19 @@ jobs:
       uses: azure/setup-kubectl@v3
       with:
         version: 'latest'
+        
+    - name: set up aws credentilas
+      uses: Sumanshu-Nankana/setup-aws-cli@v1
+      with:
+          region: 'us-east-1'
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
+    - name: Install kubectl
+      run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/kubectl
 
     - name: Authenticate with Kubernetes
       run: |
@@ -47,7 +59,7 @@ jobs:
 
     - name: Deploy to Green Environment
       run: |
-        kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:${{ github.sha }} --namespace=green
+        kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:latest --namespace=green
         kubectl rollout status deployment/blue-green --namespace=green
 
   switch:
