@@ -58,7 +58,8 @@ jobs:
         #base64-kube-config: ${{ secrets.KUBECONFIG }}
       run: |
           aws eks update-kubeconfig --name blue-green-cluster --region us-east-1
-          kubectl apply -f kubernetes/deployment.yaml
+          kubectl get nodes
+          kubectl apply -f ./kubernetes/deployment.yaml
 
   switch:
     name: Switch Traffic
