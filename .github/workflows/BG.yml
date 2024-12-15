@@ -60,7 +60,7 @@ jobs:
 
     - name: Deploy to Green Environment
       run: |
-        kubectl apply deployment.yaml
+        kubectl apply -f deployment.yaml
         kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:latest --namespace=green
         kubectl rollout status deployment/blue-green --namespace=green
 
