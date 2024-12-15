@@ -22,7 +22,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t my-app:${{ github.sha }} .
+        docker build -t blue-green:${{ github.sha }} .
         docker tag blue-green:${{ github.sha }} imishrarohit/blue-green:${{ github.sha }}
 
     - name: Push Docker Image
@@ -47,8 +47,8 @@ jobs:
 
     - name: Deploy to Green Environment
       run: |
-        kubectl set image deployment/my-app my-app=imishrarohit/blue-green:${{ github.sha }} --namespace=green
-        kubectl rollout status deployment/my-app --namespace=green
+        kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:${{ github.sha }} --namespace=green
+        kubectl rollout status deployment/blue-green --namespace=green
 
   switch:
     name: Switch Traffic
@@ -58,7 +58,7 @@ jobs:
     steps:
     - name: Switch Load Balancer to Green
       run: |
-        kubectl patch service my-app-service --namespace=default -p '{"spec":{"selector":{"environment":"green"}}}'
+        kubectl patch service blue-green-service --namespace=default -p '{"spec":{"selector":{"environment":"green"}}}'
 
     - name: Validate Green Deployment
       run: |
@@ -67,4 +67,4 @@ jobs:
 
     - name: Scale Down Blue Deployment
       run: |
-        kubectl scale deployment/my-app --namespace=blue --replicas=0
+        kubectl scale deployment/blue-green --namespace=blue --replicas=0
