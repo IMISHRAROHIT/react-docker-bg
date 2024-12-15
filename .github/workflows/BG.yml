@@ -45,6 +45,7 @@ jobs:
           region: 'us-east-1'
           access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+     
           
     - name: Install kubectl
       run: |
