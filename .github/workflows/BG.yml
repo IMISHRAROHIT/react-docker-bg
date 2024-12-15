@@ -77,8 +77,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Switch Load Balancer to Green
+    - name: Switch Load Balancer to Green   
       run: |
+        aws eks update-kubeconfig --name blue-green-cluster --region us-east-1
         kubectl patch service blue-green-service --namespace=default -p '{"spec":{"selector":{"environment":"green"}}}'
 
     - name: Validate Green Deployment
