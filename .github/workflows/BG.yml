@@ -57,7 +57,7 @@ jobs:
       #with:
         #base64-kube-config: ${{ secrets.KUBECONFIG }}
       run: |
-          aws eks update-kubeconfig --name blue-gree-cluster --region us-east-1
+          aws eks update-kubeconfig --name blue-green-cluster --region us-east-1
           kubectl apply -f deployment.yaml
           kubectl set image deployment/blue-green blue-green=imishrarohit/blue-green:latest --namespace=green
           kubectl rollout status deployment/blue-green --namespace=green
