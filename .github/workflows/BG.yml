@@ -45,18 +45,12 @@ jobs:
           region: 'us-east-1'
           access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-     
-          
+           
     - name: Install kubectl
       run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/kubectl
-
-    - name: Authenticate with Kubernetes
-      run: |
-        echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
-        export KUBECONFIG=kubeconfig.yaml
         
     - name: Deploy to Green Environment
       uses: tale/kubectl-action@v1
