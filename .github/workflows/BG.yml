@@ -23,11 +23,11 @@ jobs:
     - name: Build Docker Image
       run: |
         docker build -t my-app:${{ github.sha }} .
-        docker tag my-app:${{ github.sha }} my-dockerhub-repo/my-app:${{ github.sha }}
+        docker tag blue-green:${{ github.sha }} imishrarohit/blue-green:${{ github.sha }}
 
     - name: Push Docker Image
       run: |
-        docker push my-dockerhub-repo/my-app:${{ github.sha }}
+        docker push imishrarohit/blue-green:${{ github.sha }}
 
   deploy:
     name: Deploy to Green Environment
@@ -47,7 +47,7 @@ jobs:
 
     - name: Deploy to Green Environment
       run: |
-        kubectl set image deployment/my-app my-app=my-dockerhub-repo/my-app:${{ github.sha }} --namespace=green
+        kubectl set image deployment/my-app my-app=imishrarohit/blue-green:${{ github.sha }} --namespace=green
         kubectl rollout status deployment/my-app --namespace=green
 
   switch:
