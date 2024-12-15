@@ -1,0 +1,70 @@
+name: Blue-Green Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker Image
+      run: |
+        docker build -t my-app:${{ github.sha }} .
+        docker tag my-app:${{ github.sha }} my-dockerhub-repo/my-app:${{ github.sha }}
+
+    - name: Push Docker Image
+      run: |
+        docker push my-dockerhub-repo/my-app:${{ github.sha }}
+
+  deploy:
+    name: Deploy to Green Environment
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Authenticate with Kubernetes
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+        export KUBECONFIG=kubeconfig.yaml
+
+    - name: Deploy to Green Environment
+      run: |
+        kubectl set image deployment/my-app my-app=my-dockerhub-repo/my-app:${{ github.sha }} --namespace=green
+        kubectl rollout status deployment/my-app --namespace=green
+
+  switch:
+    name: Switch Traffic
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Switch Load Balancer to Green
+      run: |
+        kubectl patch service my-app-service --namespace=default -p '{"spec":{"selector":{"environment":"green"}}}'
+
+    - name: Validate Green Deployment
+      run: |
+        # Add custom health checks or validation here
+        kubectl get pods --namespace=green
+
+    - name: Scale Down Blue Deployment
+      run: |
+        kubectl scale deployment/my-app --namespace=blue --replicas=0
